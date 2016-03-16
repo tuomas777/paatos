@@ -1,0 +1,17 @@
+Django~=1.9.0
+pip-tools
+djangorestframework
+django-autoslug
+django-enumfields
+django-environ
+django-parler-rest
+# dev requirements:
+autoflake
+autopep8
+coveralls
+flake8
+isort
+pytest-cov
+pytest-django
+pytest-factoryboy
+drf-nested-routers

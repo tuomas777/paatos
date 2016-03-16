@@ -1,0 +1,10 @@
+language: python
+sudo: false
+python: 3.4
+install:
+  - pip install -U pip wheel
+  - pip install -r requirements.txt
+script:
+  - flake8 paatos
+  - py.test -vvv --cov paatos paatos/tests
+after_success: coveralls
