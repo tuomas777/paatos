@@ -1,4 +1,5 @@
 *$py.class
+*~
 *,cover
 *.egg
 *.egg-info/
@@ -49,3 +50,4 @@ sdist/
 target/
 var/
 venv/
+/.django_secret

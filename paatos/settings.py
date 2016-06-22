@@ -1,28 +1,32 @@
 import os
 from environ import Env
+from django.utils.translation import ugettext_lazy as _
 
 BASE_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
 assert os.path.exists(os.path.join(BASE_DIR, "manage.py"))
 
 env = Env()
 
-ALLOWED_HOSTS = ["*"]
-DEBUG = True  # TODO
-LANGUAGE_CODE = "en-us"
-VAR_ROOT = env.str("VAR_ROOT", default=os.path.join(BASE_DIR, "var"))
+DEBUG = False
+LANGUAGE_CODE = "fi"
+LANGUAGES = [
+    ('fi', _('Finnish')),
+    ('sv', _('Swedish')),
+    ('en', _('English'))
+]
+VAR_ROOT = env.str("VAR_ROOT", default=BASE_DIR)
 if not os.path.isdir(VAR_ROOT):
     os.makedirs(VAR_ROOT)
 MEDIA_ROOT = os.path.join(VAR_ROOT, "media")
 MEDIA_URL = "/media/"
-ROOT_URLCONF = "paatos_proj.urls"
-SECRET_KEY = "paatos"  # TODO
+ROOT_URLCONF = "paatos.urls"
 STATIC_ROOT = os.path.join(VAR_ROOT, "static")
 STATIC_URL = "/static/"
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Helsinki"
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-WSGI_APPLICATION = "paatos_proj.wsgi.application"
+WSGI_APPLICATION = "paatos.wsgi.application"
 
 
 INSTALLED_APPS = [
@@ -66,3 +70,33 @@ TEMPLATES = [
 DATABASES = {
     "default": env.db_url(default="sqlite:///%s" % os.path.join(BASE_DIR, "db.sqlite3")),
 }
+
+
+# local_settings.py can be used to override environment-specific settings
+# like database and email that differ between development and production.
+f = os.path.join(BASE_DIR, "local_settings.py")
+if os.path.exists(f):
+    import sys
+    import imp
+    module_name = "%s.local_settings" % ROOT_URLCONF.split('.')[0]
+    module = imp.new_module(module_name)
+    module.__file__ = f
+    sys.modules[module_name] = module
+    exec(open(f, "rb").read())
+
+if 'SECRET_KEY' not in locals():
+    secret_file = os.path.join(BASE_DIR, '.django_secret')
+    try:
+        SECRET_KEY = open(secret_file).read().strip()
+    except IOError:
+        import random
+        system_random = random.SystemRandom()
+        try:
+            SECRET_KEY = ''.join([system_random.choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(64)])
+            secret = open(secret_file, 'w')
+            import os
+            os.chmod(secret_file, 0o0600)
+            secret.write(SECRET_KEY)
+            secret.close()
+        except IOError:
+            Exception('Please create a %s file with random characters to generate your secret key!' % secret_file)
