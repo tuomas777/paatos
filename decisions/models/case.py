@@ -2,43 +2,43 @@
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
+from .base import BaseModel
+
+
 # from django.contrib.contenttypes.fields import GenericForeignKey
 # from django.contrib.contenttypes.models import ContentType
-from .organization import Organization  # noqa
-from .organization import Post  # noqa
-from .person import Person  # noqa
-from .meeting import Event  # noqa
 
 
-class Case(models.Model):
+class Case(BaseModel):
     iri = models.CharField(max_length=255,
                            help_text=_('IRI for this case'))
     title = models.CharField(max_length=255,
-                             help_text=_('A high level matter to be decided'))
-    description = models.CharField(max_length=255, blank=True,
-                                   help_text=_('A descriptive compact title for the case'))
+                             help_text=_('Descriptive compact title for this case'))
     summary = models.CharField(max_length=255, blank=True,
                                help_text=_('Summary of this case. Typically a few sentences.'))
-    attachments = models.ManyToManyField('Attachment')
+    attachments = models.ManyToManyField('Attachment', related_name='cases')
     category = models.CharField(max_length=255, blank=True,
                                 help_text=_('Category this case belongs to ("tehtäväluokka")'))
-    # area = models.ForeignKey('Area', null=True,
-    #                          help_text=_('Geographic area this case is related to'))
-    originator = models.ForeignKey('Person', null=True)
-    creation_date = models.DateField(blank=True, null=True)
-    public = models.BooleanField(default=True)
-    related_case = models.ManyToManyField('self', help_text=_('Other related cases'))
+    area = models.ForeignKey('Area', null=True, blank=True, help_text=_('Geographic area this case is related to'))
+    originator = models.ForeignKey('Person', blank=True, null=True, related_name='cases',
+                                   help_text=_('Person or organization the proposed this case to the city'))
+    creation_date = models.DateField(blank=True, null=True, help_text=_('Date this case was entered into system'))
+    district = models.CharField(max_length=255, blank=True,
+                                help_text=_('Name of district (if any), that this issue is related to. '))
+    public = models.BooleanField(default=True, help_text=_('Is this case public?'))
+    related_cases = models.ManyToManyField('self', help_text=_('Other cases that are related to this case'))
 
     def __str__(self):
         return self.title
 
 
-class Action(models.Model):
+class Action(BaseModel):
     iri = models.CharField(max_length=255,
                            help_text=_('IRI for this action'))
     title = models.CharField(max_length=255,
-                             help_text=_('Descriptive compact title for this case'))
-    case = models.ForeignKey(Case, help_text=_('Case this action affects'))
+                             help_text=_('Title of the action'))
+    case = models.ForeignKey(Case, related_name='actions', help_text=_('Case this action is related to'))
     ordering = models.IntegerField(help_text=_('Ordering of this action within a meeting'))
     article_number = models.CharField(max_length=255, null=True,
                                       help_text=_('The article number given to this action after decision'))
@@ -48,12 +48,13 @@ class Action(models.Model):
                                                'The format will vary between cities.'))
     resolution = models.CharField(max_length=255, blank=True, null=True,
                                   help_text="Resolution taken in this action (like tabled, decided...)")
-    responsible_party = models.ForeignKey('Organization', help_text=_(
+    responsible_party = models.ForeignKey('Organization', related_name='actions', help_text=_(
         'The city organization responsible for this decision. If decision is delegated, this is '
         'the organization that delegated the authority.'))
-    delegation = models.ForeignKey('Post', blank=True, null=True, help_text=_(
+    delegation = models.ForeignKey('Post', related_name='actions', blank=True, null=True, help_text=_(
         'If this decision was delegated, this field will be filled and refers to the post that made the decision'))
-    event = models.ForeignKey('Event', help_text=_('Event (if any) where this action took place'), null=True)
+    event = models.ForeignKey('Event', related_name='actions',
+                              help_text=_('Event (if any) where this action took place'), null=True)
     # Contents for this action refer to this
     # Votes for this action refer here
 
@@ -61,7 +62,7 @@ class Action(models.Model):
         return self.title
 
 
-class Content(models.Model):
+class Content(BaseModel):
     iri = models.CharField(max_length=255, help_text=_('IRI for this content'))
     ordering = models.IntegerField(help_text=_('Ordering of this content within the larger context (like action)'))
     title = models.CharField(max_length=255, help_text=_('Title of this content'))
@@ -71,13 +72,13 @@ class Content(models.Model):
         'Content formatted with pseudo-HTML. Only a very restricted set of tags is allowed. '
         'These are: first and second level headings (P+H1+H2) and table (more may be added, '
         'but start from a minimal set)'))
-    action = models.ForeignKey('Action', help_text=_('Action that this content describes'))
+    action = models.ForeignKey(Action, related_name='contents', help_text=_('Action that this content describes'))
 
     def __str__(self):
         return self.title
 
 
-class Attachment(models.Model):
+class Attachment(BaseModel):
     iri = models.CharField(max_length=255, help_text=_('IRI for this attachment'))
     file = models.CharField(max_length=255, help_text=_('FIXME: i should refer to a file'))
     # content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)

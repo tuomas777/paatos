@@ -3,18 +3,38 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-
-class Post(models.Model):
-    label = models.CharField(max_length=255,
-                             help_text=_("Post's label"))
-    organization = models.ForeignKey('Organization')
-
-    def __str__(self):
-        return self.label
+from .base import BaseModel
 
 
-class Organization(models.Model):
+class Organization(BaseModel):
     abstract = models.CharField(max_length=255, help_text=_('A one-line description of an organization'))
+    description = models.TextField(help_text=_('An extended description of an organization'))
+    # TODO type ?
+    classification = models.CharField(max_length=255, help_text=_('An organization category, e.g. committee'))
+    name = models.CharField(max_length=255, help_text=_('A primary name, e.g. a legally recognized name'))
+    founding_date = models.DateField(help_text=_('A date of founding'))
+    parent = models.ForeignKey('self', help_text=_('The organization that contains this organization'))
+    area = models.ForeignKey('Area', related_name='organizations', blank=True, null=True,
+                             help_text=_('The geographic area to which this organization is related'))
+    image = models.URLField(help_text=_('A URL of an image'), blank=True)
 
     def __str__(self):
         return self.abstract
+
+
+class Post(BaseModel):
+    label = models.CharField(max_length=255, help_text=_('A label describing the post'))
+    organization = models.ForeignKey(Organization, help_text=_('The organization in which the post is held'))
+    area = models.ForeignKey('Area', related_name='posts', blank=True, null=True,
+                             help_text=_('The geographic area to which this post is related'))
+    start_date = models.DateField(help_text=_('The date on which the post was created'))
+    end_date = models.DateField(help_text=_('The date on which the post was eliminated'), null=True, blank=True)
+    memberships = models.ManyToManyField('Membership', related_name='posts',
+                                         help_text=_('The memberships of the members of the organization and of the '
+                                                     'organization itself'))
+    # TODO type ?
+    role = models.CharField(max_length=255, help_text=_('The function that the holder of the post fulfills'))
+    other_label = models.CharField(max_length=255, help_text=_('An alternate label'), blank=True)
+
+    def __str__(self):
+        return self.label
