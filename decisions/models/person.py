@@ -2,19 +2,21 @@
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from .organization import Post  # noqa
-from .organization import Organization  # noqa
+
+from .base import BaseModel
 
 
-class Membership(models.Model):
-    person = models.ForeignKey('Person', help_text=_('Person who has membership in organization'))
-    post = models.ForeignKey('Post', help_text=_('The post held by the member through this membership'))
-    organization = models.ForeignKey('Organization',
-                                     help_text=_('The organization in which the person or organization is a member'))
-
-
-class Person(models.Model):
+class Person(BaseModel):
     name = models.CharField(max_length=255, help_text=_("A person's preferred full name"))
+    # TODO plenty of fields missing
 
     def __str__(self):
         return self.name
+
+
+class Membership(BaseModel):
+    person = models.ForeignKey(Person, related_name='memberships',
+                               help_text=_('Person who has membership in organization'))
+    organization = models.ForeignKey('Organization', related_name='memberships',
+                                     help_text=_('The organization in which the person or organization is a member'))
+    # TODO plenty of fields missing
