@@ -2,14 +2,14 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from .base import BaseModel
+from .base import DataModel
 
 
 # Popoloish models
 
 
 # "An event is an occurrence that people may attend."
-class Event(BaseModel):
+class Event(DataModel):
     name = models.CharField(max_length=255, help_text=_("The event's name"))
     organization = models.ForeignKey('Organization', related_name='events',
                                      help_text=_('The organization organizing the event'))
@@ -28,13 +28,13 @@ class Event(BaseModel):
         return self.name
 
 
-class Attendance(BaseModel):
+class Attendance(DataModel):
     event = models.ForeignKey(Event)
     attendee = models.ForeignKey('Person')
     role = models.CharField(max_length=50, help_text=_('Role of the person in the event (chairman, secretary...'))
 
 
-class VoteCount(BaseModel):
+class VoteCount(DataModel):
     # TODO type ?
     group = models.CharField(max_length=255, help_text=_('A group of voters'))
     # TODO type ?
@@ -42,7 +42,7 @@ class VoteCount(BaseModel):
     value = models.IntegerField(help_text=_('The number of votes for an option'))
 
 
-class VoteEvent(BaseModel):
+class VoteEvent(DataModel):
     legislative_session = models.ForeignKey(Event, help_text=_('The meeting (event) where this vote took place'))
     action = models.ForeignKey('Action', related_name='vote_events',
                                help_text=_('The action to which this vote event applies'))
