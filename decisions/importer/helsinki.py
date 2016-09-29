@@ -2,10 +2,9 @@
 # Based heavily on https://github.com/City-of-Helsinki/openahjo/blob/4bcb003d5db932ca28ea6851d76a20a4ee6eef54/decisions/importer/helsinki.py  # noqa
 
 import json
-import os
 from dateutil.parser import parse as dateutil_parse
 
-from django.conf import settings
+from django.db import transaction
 from django.utils.text import slugify
 from .base import Importer
 
@@ -56,6 +55,7 @@ class HelsinkiImporter(Importer):
         if created:
             self.logger.debug('Created new data source "helsinki"')
 
+    @transaction.atomic()
     def _import_organization(self, info):
         if info['type'] not in TYPE_MAP:
             return
