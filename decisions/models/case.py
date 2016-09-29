@@ -3,14 +3,14 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from .base import BaseModel
+from .base import DataModel
 
 
 # from django.contrib.contenttypes.fields import GenericForeignKey
 # from django.contrib.contenttypes.models import ContentType
 
 
-class Case(BaseModel):
+class Case(DataModel):
     iri = models.CharField(max_length=255,
                            help_text=_('IRI for this case'))
     title = models.CharField(max_length=255,
@@ -21,8 +21,9 @@ class Case(BaseModel):
     category = models.CharField(max_length=255, blank=True,
                                 help_text=_('Category this case belongs to ("tehtäväluokka")'))
     area = models.ForeignKey('Area', null=True, blank=True, help_text=_('Geographic area this case is related to'))
+    organization = models.ForeignKey('Organization', blank=True, null=True, related_name='cases')
     originator = models.ForeignKey('Person', blank=True, null=True, related_name='cases',
-                                   help_text=_('Person or organization the proposed this case to the city'))
+                                   help_text=_('Person who proposed this case to the city'))
     creation_date = models.DateField(blank=True, null=True, help_text=_('Date this case was entered into system'))
     district = models.CharField(max_length=255, blank=True,
                                 help_text=_('Name of district (if any), that this issue is related to. '))
@@ -33,7 +34,7 @@ class Case(BaseModel):
         return self.title
 
 
-class Action(BaseModel):
+class Action(DataModel):
     iri = models.CharField(max_length=255,
                            help_text=_('IRI for this action'))
     title = models.CharField(max_length=255,
@@ -62,7 +63,7 @@ class Action(BaseModel):
         return self.title
 
 
-class Content(BaseModel):
+class Content(DataModel):
     iri = models.CharField(max_length=255, help_text=_('IRI for this content'))
     ordering = models.IntegerField(help_text=_('Ordering of this content within the larger context (like action)'))
     title = models.CharField(max_length=255, help_text=_('Title of this content'))
@@ -78,7 +79,7 @@ class Content(BaseModel):
         return self.title
 
 
-class Attachment(BaseModel):
+class Attachment(DataModel):
     iri = models.CharField(max_length=255, help_text=_('IRI for this attachment'))
     file = models.CharField(max_length=255, help_text=_('FIXME: i should refer to a file'))
     # content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)

@@ -2,10 +2,10 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from .base import BaseModel
+from .base import DataModel
 
 
-class Area(BaseModel):
+class Area(DataModel):
     name = models.CharField(max_length=255, help_text=_("Area's name"))
     parent = models.ForeignKey('self', help_text=_('The area that contains this area'))
     # TODO type?

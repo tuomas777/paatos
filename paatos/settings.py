@@ -73,6 +73,23 @@ DATABASES = {
 }
 
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'decisions.importer': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}
+
+
 # local_settings.py can be used to override environment-specific settings
 # like database and email that differ between development and production.
 f = os.path.join(BASE_DIR, "local_settings.py")
