@@ -7,8 +7,8 @@ from .base import DataModel
 
 
 class Organization(DataModel):
-    abstract = models.CharField(max_length=255, help_text=_('A one-line description of an organization'))
-    description = models.TextField(help_text=_('An extended description of an organization'))
+    abstract = models.CharField(max_length=255, help_text=_('A one-line description of an organization'), blank=True)
+    description = models.TextField(help_text=_('An extended description of an organization'), blank=True)
     # TODO type ?
     classification = models.CharField(max_length=255, help_text=_('An organization category, e.g. committee'))
     name = models.CharField(max_length=255, help_text=_('A primary name, e.g. a legally recognized name'))
