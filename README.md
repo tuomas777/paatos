@@ -6,3 +6,15 @@ This app is developed using Django and Django Rest Framework.
 Päätösrajapinta on avoin ohjelmointirajapinta (API), josta kaupungin päätökset saadaan esiin yhdenmukaisessa ja koneluettavassa muodossa.
 
 Definition is here: https://github.com/6aika/api-paatos
+
+## Importing data
+
+Helsinki organizations
+```
+python manage.py import_helsinki_orgs <organizations json file>
+```
+
+Decision data from Open Ahjo
+```
+python manage.py import_open_ahjo <decision data json file>
+```

@@ -10,22 +10,24 @@ from .base import DataModel
 
 # "An event is an occurrence that people may attend."
 class Event(DataModel):
-    name = models.CharField(max_length=255, help_text=_("The event's name"))
+    name = models.CharField(max_length=255, help_text=_("The event's name"), blank=True)
     organization = models.ForeignKey('Organization', related_name='events',
-                                     help_text=_('The organization organizing the event'))
+                                     help_text=_('The organization organizing the event'), blank=True, null=True)
     attendees = models.ManyToManyField('Person', related_name='events', help_text=_('People attending this event'),
                                        through='Attendance')
-    description = models.TextField(help_text=_("The event's description"))
+    description = models.TextField(help_text=_("The event's description"), blank=True)
     # TODO type?
-    classification = models.CharField(max_length=255, help_text=_("The event's category"))
+    classification = models.CharField(max_length=255, help_text=_("The event's category"), blank=True)
     parent = models.ForeignKey('self', help_text="The event that this event is a part of", blank=True, null=True)
     # TODO type?
-    location = models.CharField(max_length=255, help_text=_("The event's location"))
+    location = models.CharField(max_length=255, help_text=_("The event's location"), blank=True)
     start_date = models.DateField(help_text=_('The time at which the event starts'))
     end_date = models.DateField(help_text=_('The time at which the event ends'), blank=True, null=True)
+    actions = models.ManyToManyField('Action', help_text=_('Actions related to this event'), related_name='events',
+                                                           blank=True)
 
     def __str__(self):
-        return self.name
+        return '%s %s' % (self.start_date, self.organization)
 
 
 class Attendance(DataModel):

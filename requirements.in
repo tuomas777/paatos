@@ -5,6 +5,7 @@ django-autoslug
 django-enumfields
 django-environ
 django-parler-rest
+django-easy-select2
 # dev requirements:
 autoflake
 autopep8
