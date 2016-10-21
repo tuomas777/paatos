@@ -8,7 +8,6 @@ class CaseSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
 class CaseViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Case.objects.all()
     serializer_class = CaseSerializer
