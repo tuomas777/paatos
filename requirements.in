@@ -1,6 +1,6 @@
-Django
+Django<1.11,<2.0
 pip-tools
-djangorestframework
+djangorestframework<3.5
 django-autoslug
 django-enumfields
 django-environ
