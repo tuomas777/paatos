@@ -1,14 +1,15 @@
-from rest_framework import serializers, viewsets
+from rest_framework import viewsets
 from decisions.models import Action, Content
+from .base import DataModelSerializer
 
 
-class ContentSerializer(serializers.ModelSerializer):
+class ContentSerializer(DataModelSerializer):
     class Meta:
         model = Content
-        exclude = ('id', 'action')
+        exclude = ('url', 'id', 'action')
 
 
-class ActionSerializer(serializers.ModelSerializer):
+class ActionSerializer(DataModelSerializer):
     contents = ContentSerializer(many=True, read_only=True)
 
     class Meta:
