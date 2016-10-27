@@ -1,8 +1,9 @@
-from rest_framework import serializers, viewsets
+from rest_framework import viewsets
 from decisions.models import Organization
+from .base import DataModelSerializer
 
 
-class OrganizationSerializer(serializers.ModelSerializer):
+class OrganizationSerializer(DataModelSerializer):
     class Meta:
         model = Organization
         fields = '__all__'

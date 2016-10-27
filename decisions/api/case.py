@@ -1,8 +1,9 @@
-from rest_framework import serializers, viewsets
+from rest_framework import viewsets
 from decisions.models import Case
+from .base import DataModelSerializer
 
 
-class CaseSerializer(serializers.ModelSerializer):
+class CaseSerializer(DataModelSerializer):
     class Meta:
         model = Case
         fields = '__all__'

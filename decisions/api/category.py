@@ -1,8 +1,9 @@
-from rest_framework import serializers, viewsets
+from rest_framework import viewsets
 from decisions.models import Category
+from .base import DataModelSerializer
 
 
-class CaseCategorySerializer(serializers.ModelSerializer):
+class CaseCategorySerializer(DataModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'

@@ -1,8 +1,9 @@
-from rest_framework import serializers, viewsets
+from rest_framework import viewsets
 from decisions.models import Event
+from .base import DataModelSerializer
 
 
-class EventSerializer(serializers.ModelSerializer):
+class EventSerializer(DataModelSerializer):
     class Meta:
         model = Event
         fields = '__all__'
