@@ -63,6 +63,8 @@ class Action(DataModel):
         'the organization that delegated the authority.'), blank=True, null=True)
     delegation = models.ForeignKey('Post', related_name='actions', blank=True, null=True, help_text=_(
         'If this decision was delegated, this field will be filled and refers to the post that made the decision'))
+    event = models.ForeignKey('Event', related_name='actions', help_text=_('Event this action is related to'))
+
     # Contents for this action refer to this
     # Votes for this action refer here
 

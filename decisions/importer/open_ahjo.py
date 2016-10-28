@@ -99,6 +99,12 @@ class OpenAhjoImporter(Importer):
                 except Case.DoesNotExist:
                     self.logger.error('Case %s does not exist' % agenda_item_data['issue'])
                     continue
+            try:
+                event = Event.objects.get(origin_id=agenda_item_data['meeting'])
+                defaults['event'] = event
+            except Event.DoesNotExist:
+                self.logger.error('Event %s does not exist' % agenda_item_data['origin_id'])
+                continue
 
             action, created = Action.objects.update_or_create(
                 origin_id=agenda_item_data['id'],
@@ -143,7 +149,7 @@ class OpenAhjoImporter(Importer):
         data_file.close()
 
         self._import_categories(data)
+        self._import_events(data)
         self._import_cases(data)
         self._import_actions(data)
         self._import_contents(data)
-        self._import_events(data)

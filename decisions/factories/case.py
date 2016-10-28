@@ -1,6 +1,7 @@
 import factory
 from faker import Faker
 from decisions.models import Action, Case, Category
+from .event import EventFactory
 
 fake = Faker()
 fake.seed(7)
@@ -29,5 +30,6 @@ class ActionFactory(factory.django.DjangoModelFactory):
 
     title = fake.text(max_nb_chars=50)
     case = factory.SubFactory(CaseFactory)
+    event = factory.SubFactory(EventFactory)
     resolution = 'proposed'
     ordering = factory.Sequence(lambda n: n)
