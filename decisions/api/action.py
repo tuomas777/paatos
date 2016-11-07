@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import filters, viewsets
 from decisions.models import Action, Content
 from .base import DataModelSerializer
 
@@ -20,3 +20,5 @@ class ActionSerializer(DataModelSerializer):
 class ActionViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Action.objects.all()
     serializer_class = ActionSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('title', 'contents__hypertext')
