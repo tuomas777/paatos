@@ -23,8 +23,6 @@ class Event(DataModel):
     location = models.CharField(max_length=255, help_text=_("The event's location"), blank=True)
     start_date = models.DateField(help_text=_('The time at which the event starts'))
     end_date = models.DateField(help_text=_('The time at which the event ends'), blank=True, null=True)
-    actions = models.ManyToManyField('Action', help_text=_('Actions related to this event'), related_name='events',
-                                                           blank=True)
 
     def __str__(self):
         return '%s %s' % (self.start_date, self.organization)

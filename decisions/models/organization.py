@@ -29,13 +29,14 @@ class Post(DataModel):
     organization = models.ForeignKey(Organization, help_text=_('The organization in which the post is held'))
     area = models.ForeignKey('Area', related_name='posts', blank=True, null=True,
                              help_text=_('The geographic area to which this post is related'))
-    start_date = models.DateField(help_text=_('The date on which the post was created'))
+    start_date = models.DateField(help_text=_('The date on which the post was created'), null=True, blank=True)
     end_date = models.DateField(help_text=_('The date on which the post was eliminated'), null=True, blank=True)
     memberships = models.ManyToManyField('Membership', related_name='posts',
                                          help_text=_('The memberships of the members of the organization and of the '
                                                      'organization itself'))
     # TODO type ?
-    role = models.CharField(max_length=255, help_text=_('The function that the holder of the post fulfills'))
+    role = models.CharField(max_length=255, help_text=_('The function that the holder of the post fulfills'),
+                            blank=True)
     other_label = models.CharField(max_length=255, help_text=_('An alternate label'), blank=True)
 
     def __str__(self):
