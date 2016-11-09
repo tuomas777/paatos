@@ -155,8 +155,9 @@ class HelsinkiImporter(Importer):
 
     def import_organizations(self, filename):
         self.logger.info('Importing organizations...')
-        org_file = open(filename, 'r')
-        org_list = json.load(org_file)
+
+        with open(filename, 'r') as org_file:
+            org_list = json.load(org_file)
 
         if not self.options['include_people']:
             Person.objects.all().delete()
