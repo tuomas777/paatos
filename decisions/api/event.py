@@ -1,6 +1,13 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import serializers, viewsets
 from decisions.models import Action, Event
-from .base import DataModelSerializer
+from .base import BaseFilter, DataModelSerializer
+
+
+class EventFilter(BaseFilter):
+    class Meta:
+        model = Event
+        fields = BaseFilter.Meta.fields + ('organization',)
 
 
 class EventSerializer(DataModelSerializer):
@@ -14,3 +21,5 @@ class EventSerializer(DataModelSerializer):
 class EventViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_class = EventFilter

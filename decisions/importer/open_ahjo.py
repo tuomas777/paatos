@@ -22,7 +22,6 @@ class OpenAhjoImporter(Importer):
             defaults = dict(
                 data_source=self.data_source,
                 name=category_data['name'],
-                parent_id=category_data['parent'],
             )
 
             category, created = Category.objects.update_or_create(
@@ -103,7 +102,7 @@ class OpenAhjoImporter(Importer):
                 event = Event.objects.get(origin_id=agenda_item_data['meeting'])
                 defaults['event'] = event
             except Event.DoesNotExist:
-                self.logger.error('Event %s does not exist' % agenda_item_data['origin_id'])
+                self.logger.error('Event %s does not exist' % agenda_item_data['meeting'])
                 continue
 
             action, created = Action.objects.update_or_create(
