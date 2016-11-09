@@ -44,6 +44,15 @@ TYPE_NAME_FI = {
     15: 'Toimikunta',
 }
 
+PARENT_OVERRIDES = {
+    'Kiinteistövirasto': '100',  # Kaupunkisuunnittelu- ja kiinteistötoimi'
+    'Kaupunginhallituksen konsernijaosto': '00400',   # Kaupunginhallitus
+    'Opetusvirasto': '301',  # Sivistystoimi,
+    'Kaupunkisuunnitteluvirasto': '100',  # Kaupunkisuunnittelu- ja kiinteistötoimi'
+    'Sosiaali- ja terveysvirasto': '400',  # Sosiaali- ja terveystoimi
+    'Kaupunginkanslia': '00001',  # Helsingin kaupunki
+}
+
 
 class HelsinkiImporter(Importer):
     def __init__(self, *args, **kwargs):
@@ -109,10 +118,22 @@ class HelsinkiImporter(Importer):
             org['contact_details'].append(cd)
         org['modified_at'] = dateutil_parse(info['modified_time'])
 
-        parents = info['parents']
-        if parents is None:
-            parents = []
-        org['parents'] = [x for x in parents if x not in self.skip_orgs]
+        parents = []
+        if org['name'] in PARENT_OVERRIDES:
+            parent = PARENT_OVERRIDES[org['name']]
+        else:
+            parent = None
+            if info['parents'] is not None:
+                parents = info['parents']
+                try:
+                    parent = parents[0]
+                except IndexError:
+                    pass
+
+        if parent not in self.skip_orgs:
+            if len(parents) > 1:
+                self.logger.warning('Org %s has multiple parents %s, choosing the first one' % (org['name'], parents))
+            org['parent'] = parent
 
         org['memberships'] = []
         for person_info in info['people']:
@@ -157,5 +178,5 @@ class HelsinkiImporter(Importer):
                     ordered.append(org)
 
         for i, org in enumerate(ordered):
-            print('Processing organization {} / {}'.format(i + 1, len(ordered)))
+            self.logger.info('Processing organization {} / {}'.format(i + 1, len(ordered)))
             self._import_organization(org)

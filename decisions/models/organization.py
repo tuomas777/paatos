@@ -14,8 +14,8 @@ class Organization(DataModel):
     name = models.CharField(max_length=255, help_text=_('A primary name, e.g. a legally recognized name'))
     founding_date = models.DateField(help_text=_('A date of founding'), blank=True, null=True)
     dissolution_date = models.DateField(help_text=_('A date of dissolution'), blank=True, null=True)
-    parents = models.ManyToManyField('self', help_text=_('The organizations that contain this organization'),
-                                     blank=True)
+    parent = models.ForeignKey('self', help_text=_('The organizations that contain this organization'), null=True,
+                               blank=True)
     area = models.ForeignKey('Area', related_name='organizations', blank=True, null=True,
                              help_text=_('The geographic area to which this organization is related'))
     image = models.URLField(help_text=_('A URL of an image'), blank=True)
