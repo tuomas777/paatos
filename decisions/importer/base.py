@@ -44,7 +44,7 @@ class Importer(object):
         return membership
 
     def save_organization(self, info):
-        membership_infos = info.pop('memberships')
+        membership_infos = info.pop('memberships', [])
 
         organization, created = Organization.objects.update_or_create(
             data_source=self.data_source,

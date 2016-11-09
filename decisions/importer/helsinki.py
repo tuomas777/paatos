@@ -8,7 +8,7 @@ from django.db import transaction
 from django.utils.text import slugify
 from .base import Importer
 
-from decisions.models import DataSource
+from decisions.models import DataSource, Person, Membership
 
 TYPE_MAP = {
     1: 'council',
@@ -136,19 +136,20 @@ class HelsinkiImporter(Importer):
             org['parent'] = parent
 
         org['memberships'] = []
-        for person_info in info['people']:
-            person = dict(
-                origin_id=person_info['id'],
-                given_name=person_info['first_name'],
-                family_name=person_info['last_name'],
-                name='{} {}'.format(person_info['first_name'], person_info['last_name'])
-            )
-            org['memberships'].append(dict(
-                person=person,
-                start_date=person_info['start_time'],
-                end_date=person_info['end_time'],
-                role=person_info['role'],
-            ))
+        if self.options['include_people']:
+            for person_info in info['people']:
+                person = dict(
+                    origin_id=person_info['id'],
+                    given_name=person_info['first_name'],
+                    family_name=person_info['last_name'],
+                    name='{} {}'.format(person_info['first_name'], person_info['last_name'])
+                )
+                org['memberships'].append(dict(
+                    person=person,
+                    start_date=person_info['start_time'],
+                    end_date=person_info['end_time'],
+                    role=person_info['role'],
+                ))
 
         self.save_organization(org)
 
@@ -156,6 +157,9 @@ class HelsinkiImporter(Importer):
         self.logger.info('Importing organizations...')
         org_file = open(filename, 'r')
         org_list = json.load(org_file)
+
+        if not self.options['include_people']:
+            Person.objects.all().delete()
 
         self.skip_orgs = set()
 
