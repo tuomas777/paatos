@@ -1,14 +1,14 @@
 from rest_framework import viewsets
-from decisions.models import Category
+from decisions.models import Function
 from .base import DataModelSerializer
 
 
-class CaseCategorySerializer(DataModelSerializer):
+class FunctionSerializer(DataModelSerializer):
     class Meta:
-        model = Category
+        model = Function
         fields = '__all__'
 
 
-class CaseCategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Category.objects.all()
-    serializer_class = CaseCategorySerializer
+class FunctionViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Function.objects.all()
+    serializer_class = FunctionSerializer

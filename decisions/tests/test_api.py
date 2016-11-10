@@ -5,12 +5,12 @@ from rest_framework.reverse import reverse
 @pytest.mark.parametrize('resource', [
     'action',
     'case',
-    'category',
     'event',
+    'function',
     'organization',
 ])
 @pytest.mark.django_db
-def test_smoke_get(client, resource, action, case, category, event, organization):
+def test_smoke_get(client, resource, action, case, function, event, organization):
     """
     Test GET to every resource's list and detail endpoint.
     """

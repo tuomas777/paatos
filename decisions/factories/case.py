@@ -1,15 +1,15 @@
 import factory
 from faker import Faker
-from decisions.models import Action, Case, Category
+from decisions.models import Action, Case, Function
 from .event import EventFactory
 
 fake = Faker()
 fake.seed(7)
 
 
-class CategoryFactory(factory.django.DjangoModelFactory):
+class FunctionFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = Category
+        model = Function
     name = fake.text(max_nb_chars=20)
 
 
@@ -21,7 +21,7 @@ class CaseFactory(factory.django.DjangoModelFactory):
     summary = fake.paragraph(nb_sentences=5)
     register_id = factory.Sequence(lambda n: 'HEL 2016-{:0>6}'.format(n))
     creation_date = fake.date()
-    category = factory.SubFactory(CategoryFactory)
+    function = factory.SubFactory(FunctionFactory)
 
 
 class ActionFactory(factory.django.DjangoModelFactory):

@@ -1,9 +1,9 @@
 from pytest_factoryboy import register
 
-from decisions.factories import ActionFactory, CaseFactory, CategoryFactory, EventFactory, OrganizationFactory
+from decisions.factories import ActionFactory, CaseFactory, EventFactory, FunctionFactory, OrganizationFactory
 
 register(ActionFactory)
 register(CaseFactory)
-register(CategoryFactory)
+register(FunctionFactory)
 register(EventFactory)
 register(OrganizationFactory)
