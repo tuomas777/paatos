@@ -7,6 +7,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('filename', type=str)
+        parser.add_argument('--include-people', action='store_true', dest='include_people', default=False)
 
     def handle(self, *args, **options):
         importer = HelsinkiImporter(options)

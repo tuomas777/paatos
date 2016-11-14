@@ -8,7 +8,7 @@ from django.db import transaction
 from django.utils.text import slugify
 from .base import Importer
 
-from decisions.models import DataSource
+from decisions.models import DataSource, Person, Membership
 
 TYPE_MAP = {
     1: 'council',
@@ -42,6 +42,15 @@ TYPE_NAME_FI = {
     13: 'Kaupunki',
     14: 'Yksikkö',
     15: 'Toimikunta',
+}
+
+PARENT_OVERRIDES = {
+    'Kiinteistövirasto': '100',  # Kaupunkisuunnittelu- ja kiinteistötoimi'
+    'Kaupunginhallituksen konsernijaosto': '00400',   # Kaupunginhallitus
+    'Opetusvirasto': '301',  # Sivistystoimi,
+    'Kaupunkisuunnitteluvirasto': '100',  # Kaupunkisuunnittelu- ja kiinteistötoimi'
+    'Sosiaali- ja terveysvirasto': '400',  # Sosiaali- ja terveystoimi
+    'Kaupunginkanslia': '00001',  # Helsingin kaupunki
 }
 
 
@@ -109,32 +118,49 @@ class HelsinkiImporter(Importer):
             org['contact_details'].append(cd)
         org['modified_at'] = dateutil_parse(info['modified_time'])
 
-        parents = info['parents']
-        if parents is None:
-            parents = []
-        org['parents'] = [x for x in parents if x not in self.skip_orgs]
+        parents = []
+        if org['name'] in PARENT_OVERRIDES:
+            parent = PARENT_OVERRIDES[org['name']]
+        else:
+            parent = None
+            if info['parents'] is not None:
+                parents = info['parents']
+                try:
+                    parent = parents[0]
+                except IndexError:
+                    pass
+
+        if parent not in self.skip_orgs:
+            if len(parents) > 1:
+                self.logger.warning('Org %s has multiple parents %s, choosing the first one' % (org['name'], parents))
+            org['parent'] = parent
 
         org['memberships'] = []
-        for person_info in info['people']:
-            person = dict(
-                origin_id=person_info['id'],
-                given_name=person_info['first_name'],
-                family_name=person_info['last_name'],
-                name='{} {}'.format(person_info['first_name'], person_info['last_name'])
-            )
-            org['memberships'].append(dict(
-                person=person,
-                start_date=person_info['start_time'],
-                end_date=person_info['end_time'],
-                role=person_info['role'],
-            ))
+        if self.options['include_people']:
+            for person_info in info['people']:
+                person = dict(
+                    origin_id=person_info['id'],
+                    given_name=person_info['first_name'],
+                    family_name=person_info['last_name'],
+                    name='{} {}'.format(person_info['first_name'], person_info['last_name'])
+                )
+                org['memberships'].append(dict(
+                    person=person,
+                    start_date=person_info['start_time'],
+                    end_date=person_info['end_time'],
+                    role=person_info['role'],
+                ))
 
         self.save_organization(org)
 
     def import_organizations(self, filename):
         self.logger.info('Importing organizations...')
-        org_file = open(filename, 'r')
-        org_list = json.load(org_file)
+
+        with open(filename, 'r') as org_file:
+            org_list = json.load(org_file)
+
+        if not self.options['include_people']:
+            Person.objects.all().delete()
 
         self.skip_orgs = set()
 
@@ -157,5 +183,5 @@ class HelsinkiImporter(Importer):
                     ordered.append(org)
 
         for i, org in enumerate(ordered):
-            print('Processing organization {} / {}'.format(i + 1, len(ordered)))
+            self.logger.info('Processing organization {} / {}'.format(i + 1, len(ordered)))
             self._import_organization(org)
