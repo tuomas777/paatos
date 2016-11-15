@@ -8,12 +8,12 @@ from .base import DataModel
 
 # from django.contrib.contenttypes.fields import GenericForeignKey
 # from django.contrib.contenttypes.models import ContentType
-class Category(DataModel):
-    name = models.CharField(max_length=255, help_text=_('Name of this category'))
-    parent = models.ForeignKey('self', help_text=_('Parent category of this category'), blank=True, null=True)
+class Function(DataModel):
+    name = models.CharField(max_length=255, help_text=_('Name of this function'))
+    function_id = models.CharField(max_length=32, help_text=_('Original identifier of this function'))
+    parent = models.ForeignKey('self', help_text=_('Parent function of this function'), blank=True, null=True)
 
     def __str__(self):
-        # TODO cache
         return '%s / %s' % (self.parent, self.name) if self.parent else self.name
 
 
@@ -26,8 +26,8 @@ class Case(DataModel):
                                help_text=_('Summary of this case. Typically a few sentences.'))
     register_id = models.CharField(max_length=255, help_text=_('Register ID of this case'), unique=True, db_index=True)
     attachments = models.ManyToManyField('Attachment', related_name='cases')
-    category = models.ForeignKey(Category, related_name='cases',
-                                 help_text=_('Category this case belongs to ("tehtäväluokka")'))
+    function = models.ForeignKey(Function, related_name='cases',
+                                 help_text=_('Function this case belongs to ("tehtäväluokka")'))
     area = models.ForeignKey('Area', null=True, blank=True, help_text=_('Geographic area this case is related to'))
     organization = models.ForeignKey('Organization', blank=True, null=True, related_name='cases')
     originator = models.ForeignKey('Person', blank=True, null=True, related_name='cases',

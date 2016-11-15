@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import json
-from .base import Importer
 
-from decisions.models import Action, Case, Category, Content, DataSource, Event, Organization
+from decisions.models import Action, Case, Content, DataSource, Event, Function, Organization
+
+from .base import Importer
 
 
 class OpenAhjoImporter(Importer):
@@ -15,22 +16,31 @@ class OpenAhjoImporter(Importer):
         if created:
             self.logger.debug('Created new data source "open_ahjo"')
 
-    def _import_categories(self, data):
-        self.logger.info('Importing categories...')
+    def _import_functions(self, data):
+        self.logger.info('Importing functions...')
 
-        for category_data in data['categories']:
+        for function_data in data['categories']:
             defaults = dict(
                 data_source=self.data_source,
-                name=category_data['name'],
+                name=function_data['name'],
+                function_id=function_data['origin_id'],
             )
 
-            category, created = Category.objects.update_or_create(
-                origin_id=category_data['origin_id'],
+            parent_id = function_data['parent']
+            if parent_id:
+                try:
+                    defaults['parent'] = Function.objects.get(origin_id=parent_id)
+                except Function.DoesNotExist:
+                    self.logger('Function parent %s does not exist' % parent_id)
+                    continue
+
+            function, created = Function.objects.update_or_create(
+                origin_id=function_data['id'],
                 defaults=defaults
             )
 
             if created:
-                self.logger.info('Created category %s' % category)
+                self.logger.info('Created function %s' % function)
 
     def _import_events(self, data):
         self.logger.info('Importing events...')
@@ -70,9 +80,15 @@ class OpenAhjoImporter(Importer):
             defaults = dict(
                 data_source=self.data_source,
                 title=issue_data['subject'],
-                category_id=issue_data['category'],
                 register_id=issue_data['register_id'],
             )
+
+            try:
+                defaults['function'] = Function.objects.get(origin_id=issue_data['category'])
+            except Function.DoesNotExist:
+                self.logger.error('Function %s does not exist' % issue_data['category'])
+                continue
+
             case, created = Case.objects.update_or_create(
                 origin_id=issue_data['id'],
                 defaults=defaults,
@@ -93,7 +109,7 @@ class OpenAhjoImporter(Importer):
             )
             if agenda_item_data['issue']:
                 try:
-                    case = Case.objects.get(id=agenda_item_data['issue'])
+                    case = Case.objects.get(origin_id=agenda_item_data['issue'])
                     defaults['case'] = case
                 except Case.DoesNotExist:
                     self.logger.error('Case %s does not exist' % agenda_item_data['issue'])
@@ -147,7 +163,7 @@ class OpenAhjoImporter(Importer):
         data = json.load(data_file)
         data_file.close()
 
-        self._import_categories(data)
+        self._import_functions(data)
         self._import_events(data)
         self._import_cases(data)
         self._import_actions(data)
