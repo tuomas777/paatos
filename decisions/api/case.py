@@ -7,7 +7,7 @@ from .base import BaseFilter, DataModelSerializer
 class CaseFilter(BaseFilter):
     class Meta:
         model = Case
-        fields = BaseFilter.Meta.fields + ('function', 'register_id')
+        fields = BaseFilter.Meta.fields + ('register_id',)
 
 
 class CaseSerializer(DataModelSerializer):
@@ -15,11 +15,11 @@ class CaseSerializer(DataModelSerializer):
 
     class Meta:
         model = Case
-        fields = '__all__'
+        exclude = ('related_cases',)
 
 
 class CaseViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Case.objects.all()
+    queryset = Case.objects.select_related('data_source').prefetch_related('actions', 'attachments')
     serializer_class = CaseSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
     filter_class = CaseFilter

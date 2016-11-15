@@ -12,5 +12,5 @@ class OrganizationSerializer(DataModelSerializer):
 
 
 class OrganizationViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Organization.objects.all()
+    queryset = Organization.objects.select_related('data_source').prefetch_related('events')
     serializer_class = OrganizationSerializer
