@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import CharFilter
 from rest_framework import filters, viewsets
 from decisions.models import Action, Content
 from .base import BaseFilter, DataModelSerializer
@@ -11,9 +12,12 @@ class ContentSerializer(DataModelSerializer):
 
 
 class ActionFilter(BaseFilter):
+    case = CharFilter(name='case_id')
+    event = CharFilter(name='event_id')
+
     class Meta:
         model = Action
-        fields = BaseFilter.Meta.fields + ('case',)
+        fields = BaseFilter.Meta.fields + ('case', 'event')
 
 
 class ActionSerializer(DataModelSerializer):
