@@ -1,13 +1,16 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import CharFilter
 from rest_framework import filters, serializers, viewsets
 from decisions.models import Action, Case
 from .base import BaseFilter, DataModelSerializer
 
 
 class CaseFilter(BaseFilter):
+    function = CharFilter(name='function_id')
+
     class Meta:
         model = Case
-        fields = BaseFilter.Meta.fields + ('register_id',)
+        fields = BaseFilter.Meta.fields + ('function', 'register_id')
 
 
 class CaseSerializer(DataModelSerializer):
