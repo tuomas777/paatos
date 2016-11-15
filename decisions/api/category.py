@@ -10,5 +10,5 @@ class FunctionSerializer(DataModelSerializer):
 
 
 class FunctionViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Function.objects.all()
+    queryset = Function.objects.select_related('data_source', 'parent', 'parent__parent', 'parent__parent__parent')
     serializer_class = FunctionSerializer

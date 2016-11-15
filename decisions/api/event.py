@@ -15,11 +15,11 @@ class EventSerializer(DataModelSerializer):
 
     class Meta:
         model = Event
-        fields = '__all__'
+        exclude = ('attendees',)
 
 
 class EventViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Event.objects.all()
+    queryset = Event.objects.select_related('data_source').prefetch_related('actions',)
     serializer_class = EventSerializer
     filter_backends = (DjangoFilterBackend,)
     filter_class = EventFilter

@@ -25,7 +25,7 @@ class ActionSerializer(DataModelSerializer):
 
 
 class ActionViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Action.objects.all()
+    queryset = Action.objects.select_related('data_source').prefetch_related('contents', 'contents__data_source')
     serializer_class = ActionSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
     filter_class = ActionFilter
