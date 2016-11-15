@@ -7,7 +7,7 @@ from .base import BaseFilter, DataModelSerializer
 class CaseFilter(BaseFilter):
     class Meta:
         model = Case
-        fields = BaseFilter.Meta.fields + ('function', 'register_id')
+        fields = BaseFilter.Meta.fields + ('register_id',)
 
 
 class CaseSerializer(DataModelSerializer):

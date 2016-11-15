@@ -13,7 +13,7 @@ class ContentSerializer(DataModelSerializer):
 class ActionFilter(BaseFilter):
     class Meta:
         model = Action
-        fields = BaseFilter.Meta.fields + ('case', 'event')
+        fields = BaseFilter.Meta.fields + ('case',)
 
 
 class ActionSerializer(DataModelSerializer):
