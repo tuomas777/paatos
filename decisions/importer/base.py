@@ -46,25 +46,28 @@ class Importer(object):
     def save_organization(self, info):
         membership_infos = info.pop('memberships', [])
 
-        organization, created = Organization.objects.update_or_create(
-            data_source=self.data_source,
-            origin_id=info['origin_id'],
-            defaults={
-                'name': info['name'],
-                'founding_date': info['founding_date'],
-                'classification': info['classification'],
-                'dissolution_date': info['dissolution_date'],
-            })
-        verb = 'Created' if created else 'Updated'
-        self.logger.info('{} organization {}'.format(verb, organization))
+        defaults = {
+            'name': info['name'],
+            'founding_date': info['founding_date'],
+            'classification': info['classification'],
+            'dissolution_date': info['dissolution_date'],
+        }
 
         parent = info['parent']
         if parent:
             try:
-                organization.parent = Organization.objects.get(origin_id=info['parent'])
+                defaults['parent'] = Organization.objects.get(origin_id=info['parent'])
             except Organization.DoesNotExist:
                 self.logger.error('Cannot set parent for org %s, org with origin_id %s does not exist' %
                                   (info['name'], info['parent']))
+
+        organization, created = Organization.objects.update_or_create(
+            data_source=self.data_source,
+            origin_id=info['origin_id'],
+            defaults=defaults,
+        )
+        verb = 'Created' if created else 'Updated'
+        self.logger.info('{} organization {}'.format(verb, organization))
 
         organization.memberships.all().delete()
         for membership_info in membership_infos:
