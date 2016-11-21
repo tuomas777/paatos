@@ -38,11 +38,13 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "easy_select2",
+    "debug_toolbar",
     "paatos",
     "decisions",
 ]
 
 MIDDLEWARE_CLASSES = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -97,6 +99,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASS': 'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
 }
+
+OPEN_AHJO_ATTACHMENT_URL_BASE = 'https://dev.hel.fi/paatokset'
 
 
 # local_settings.py can be used to override environment-specific settings
