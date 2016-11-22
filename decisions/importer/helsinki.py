@@ -71,7 +71,7 @@ class HelsinkiImporter(Importer):
         org = dict(origin_id=info['id'])
         org['classification'] = TYPE_NAME_FI[info['type']]
 
-        if org['classification'] in ['introducer', 'introducer_field']:
+        if org['type'] in ['introducer', 'introducer_field']:
             self.skip_orgs.add(org['origin_id'])
             return
 
@@ -90,7 +90,7 @@ class HelsinkiImporter(Importer):
         ]
 
         abbr = org.get('abbreviation', None)
-        if org['classification'] in ('council', 'committee', 'board_division', 'board'):
+        if org['type'] in ('council', 'committee', 'board_division', 'board'):
             org['slug'] = slugify(org['abbreviation'])
         else:
             org['slug'] = slugify(org['origin_id'])
