@@ -90,8 +90,18 @@ class Content(DataModel):
 
 
 class Attachment(DataModel):
-    iri = models.CharField(max_length=255, help_text=_('IRI for this attachment'), blank=True)
-    file = models.CharField(max_length=255, help_text=_('FIXME: i should refer to a file'))
-    # content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    # object_id = models.PositiveIntegerField()
-    # content_object = GenericForeignKey('content_type', 'object_id')
+    # file = models.FileField()  # TODO
+    name = models.CharField(max_length=400, blank=True, help_text='Short name of this attachment')
+    url = models.URLField(help_text=_('URL of the content of this attachment'))
+    action = models.ForeignKey(Action, help_text=_('The action this attachment is related to'),
+                               related_name='attachments')
+    number = models.PositiveIntegerField(help_text='Index number of this attachment')
+    public = models.BooleanField(default=False, help_text=_('Is this attachment public?'))
+    confidentiality_reason = models.CharField(max_length=100, help_text=_(
+        'Reason for keeping this attachment confidential'), blank=True)
+
+    def __str__(self):
+        return '%s %s' % (self.name, self.action)
+
+    class Meta:
+        ordering = ('number',)

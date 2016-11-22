@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import json
+from django.conf import settings
 
-from decisions.models import Action, Case, Content, DataSource, Event, Function, Organization
+from decisions.models import Action, Attachment, Case, Content, DataSource, Event, Function, Organization
 
 from .base import Importer
 
@@ -157,14 +158,47 @@ class OpenAhjoImporter(Importer):
             if created:
                 self.logger.info('Created content %s' % content)
 
+    def _import_attachments(self, data):
+        self.logger.info('Importing attachments...')
+
+        url_base = getattr(settings, 'OPEN_AHJO_ATTACHMENT_URL_BASE', None)
+
+        for attachment_data in data['attachments']:
+            defaults = dict(
+                data_source=self.data_source,
+                origin_id=attachment_data['id'],
+                name=attachment_data['name'] or '',
+                url=url_base + attachment_data['url'] if attachment_data['url'] and url_base else '',
+                number=attachment_data['number'],
+                public=attachment_data['public'],
+                confidentiality_reason=attachment_data['confidentiality_reason'] or '',
+            )
+
+            action_id = attachment_data.get('agenda_item')
+            try:
+                action = Action.objects.get(origin_id=action_id)
+                defaults['action'] = action
+            except Action.DoesNotExist:
+                self.logger.error('Action %s does not exist' % action_id)
+                continue
+
+            attachment, created = Attachment.objects.update_or_create(
+                origin_id=attachment_data['id'],
+                defaults=defaults
+            )
+
+            if created:
+                self.logger.info('Created attachment %s' % attachment)
+
     def import_data(self, filename):
         self.logger.info('Importing open ahjo data...')
-        data_file = open(filename, 'r')
-        data = json.load(data_file)
-        data_file.close()
+
+        with open(filename, 'r') as data_file:
+            data = json.load(data_file)
 
         self._import_functions(data)
         self._import_events(data)
         self._import_cases(data)
         self._import_actions(data)
         self._import_contents(data)
+        self._import_attachments(data)
