@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "easy_select2",
+    "rest_framework_gis",
     "paatos",
     "decisions",
 ]

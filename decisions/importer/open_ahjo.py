@@ -2,7 +2,7 @@
 import json
 from django.conf import settings
 
-from decisions.models import Action, Attachment, Case, Content, DataSource, Event, Function, Organization
+from decisions.models import Action, Attachment, Case, CaseGeometry, Content, DataSource, Event, Function, Organization
 
 from .base import Importer
 
@@ -74,12 +74,30 @@ class OpenAhjoImporter(Importer):
             if created:
                 self.logger.info('Created event %s' % event)
 
+    def _import_case_geometries(self, data):
+        self.logger.info('Importing case geometries...')
+
+        for geometry_data in data['issue_geometries']:
+            defaults = dict(
+                name=geometry_data['name'],
+                type=geometry_data['type'],
+                geometry=geometry_data['geometry'],
+            )
+
+            case_geometry, created = CaseGeometry.objects.update_or_create(
+                data_source=self.data_source,
+                origin_id=geometry_data['id'],
+                defaults=defaults,
+            )
+
+            if created:
+                self.logger.info('Created case geometry %s' % case_geometry)
+
     def _import_cases(self, data):
         self.logger.info('Importing cases...')
 
         for issue_data in data['issues']:
             defaults = dict(
-                data_source=self.data_source,
                 title=issue_data['subject'],
                 register_id=issue_data['register_id'],
             )
@@ -91,12 +109,15 @@ class OpenAhjoImporter(Importer):
                 continue
 
             case, created = Case.objects.update_or_create(
+                data_source=self.data_source,
                 origin_id=issue_data['id'],
                 defaults=defaults,
             )
 
             if created:
                 self.logger.info('Created case %s' % case)
+
+            case.geometries = CaseGeometry.objects.filter(origin_id__in=issue_data['geometries'])
 
     def _import_actions(self, data):
         self.logger.info('Importing actions...')
@@ -198,6 +219,7 @@ class OpenAhjoImporter(Importer):
 
         self._import_functions(data)
         self._import_events(data)
+        self._import_case_geometries(data)
         self._import_cases(data)
         self._import_actions(data)
         self._import_contents(data)

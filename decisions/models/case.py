@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 
-from django.db import models
+#from django.db import models
+from django.contrib.gis.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from .base import DataModel
@@ -15,6 +16,27 @@ class Function(DataModel):
 
     def __str__(self):
         return '%s / %s' % (self.parent, self.name) if self.parent else self.name
+
+
+class CaseGeometry(DataModel):
+    ADDRESS = 'address'
+    PLAN = 'plan'
+    DISTRICT = 'district'
+
+    TYPE_CHOICES = (
+        ('address', 'Address'),
+        ('plan', 'Plan'),
+        ('district', 'District'),
+    )
+    name = models.CharField(max_length=100, db_index=True)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, db_index=True)
+    geometry = models.GeometryField()
+
+    def __str__(self):
+        return '%s (%s, %s)' % (self.name, self.type, self.geometry.geom_type)
+
+    class Meta:
+        unique_together = (('name', 'type'),)
 
 
 class Case(DataModel):
@@ -37,6 +59,9 @@ class Case(DataModel):
                                 help_text=_('Name of district (if any), that this issue is related to. '))
     public = models.BooleanField(default=True, help_text=_('Is this case public?'))
     related_cases = models.ManyToManyField('self', help_text=_('Other cases that are related to this case'))
+    area = models.ForeignKey('Area', blank=True, null=True, help_text=_('Area related to this case'))
+    geometries = models.ManyToManyField(CaseGeometry, related_name='cases', blank=True,
+                                        help_text=_('Geometries related to this case'))
 
     def __str__(self):
         return self.title
