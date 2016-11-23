@@ -2,7 +2,8 @@
 import json
 from django.conf import settings
 
-from decisions.models import Action, Attachment, Case, CaseGeometry, Content, DataSource, Event, Function, Organization
+from decisions.models import (Action, Attachment, Case, CaseGeometry, Content, DataSource, Event, Function,
+                              Organization, Post)
 
 from .base import Importer
 
@@ -16,6 +17,7 @@ class OpenAhjoImporter(Importer):
         )
         if created:
             self.logger.debug('Created new data source "open_ahjo"')
+        self.meeting_to_org = None
 
     def _import_functions(self, data):
         self.logger.info('Importing functions...')
@@ -46,9 +48,6 @@ class OpenAhjoImporter(Importer):
     def _import_events(self, data):
         self.logger.info('Importing events...')
 
-        # build dict of organizations to make matching policymakers to organizations faster
-        organization_dict = {o['policymaker']: o for o in data['organizations'] if o['policymaker']}
-
         for meeting_data in data['meetings']:
             defaults = dict(
                 data_source=self.data_source,
@@ -57,8 +56,10 @@ class OpenAhjoImporter(Importer):
                 end_date=meeting_data['date'],
             )
 
-            organization_data = organization_dict.get(meeting_data['policymaker'])
+            organization_data = self.meeting_to_org.get(meeting_data['id'])
             if organization_data:
+                if organization_data['type'] == 'office_holder':
+                    continue
                 try:
                     organization = Organization.objects.get(origin_id=organization_data['origin_id'])
                     defaults['organization'] = organization
@@ -123,6 +124,11 @@ class OpenAhjoImporter(Importer):
         self.logger.info('Importing actions...')
 
         for agenda_item_data in data['agenda_items']:
+            org = self.meeting_to_org.get(agenda_item_data['meeting'])
+            if not org:
+                self.logger.error('Cannot find matching org for meeting %s' % agenda_item_data['meeting'])
+                continue
+
             defaults = dict(
                 data_source=self.data_source,
                 title=agenda_item_data['subject'],
@@ -136,12 +142,20 @@ class OpenAhjoImporter(Importer):
                 except Case.DoesNotExist:
                     self.logger.error('Case %s does not exist' % agenda_item_data['issue'])
                     continue
-            try:
-                event = Event.objects.get(origin_id=agenda_item_data['meeting'])
-                defaults['event'] = event
-            except Event.DoesNotExist:
-                self.logger.error('Event %s does not exist' % agenda_item_data['meeting'])
-                continue
+            if org['type'] == 'office_holder':
+                try:
+                    post = Post.objects.get(origin_id=org['origin_id'])
+                    defaults['post'] = post
+                except Post.DoesNotExist:
+                    self.logger.error('Post %s does not exist' % org['origin_id'])
+                    continue
+            else:
+                try:
+                    event = Event.objects.get(origin_id=agenda_item_data['meeting'])
+                    defaults['event'] = event
+                except Event.DoesNotExist:
+                    self.logger.error('Event %s does not exist' % agenda_item_data['meeting'])
+                    continue
 
             action, created = Action.objects.update_or_create(
                 origin_id=agenda_item_data['id'],
@@ -216,6 +230,11 @@ class OpenAhjoImporter(Importer):
 
         with open(filename, 'r') as data_file:
             data = json.load(data_file)
+
+        # pre calc meeting to org mapping
+        org_dict = {o['origin_id']: o for o in data['organizations']}
+        policymaker_to_org = {p['id']: org_dict[p['origin_id']] for p in data['policymakers']}
+        self.meeting_to_org = {m['id']: policymaker_to_org[m['policymaker']] for m in data['meetings']}
 
         self._import_functions(data)
         self._import_events(data)

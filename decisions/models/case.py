@@ -86,7 +86,7 @@ class Action(DataModel):
     responsible_party = models.ForeignKey('Organization', related_name='actions', help_text=_(
         'The city organization responsible for this decision. If decision is delegated, this is '
         'the organization that delegated the authority.'), blank=True, null=True)
-    delegation = models.ForeignKey('Post', related_name='actions', blank=True, null=True, help_text=_(
+    post = models.ForeignKey('Post', related_name='actions', blank=True, null=True, help_text=_(
         'If this decision was delegated, this field will be filled and refers to the post that made the decision'))
     event = models.ForeignKey('Event', related_name='actions', help_text=_('Event this action is related to'),
                               null=True, blank=True)

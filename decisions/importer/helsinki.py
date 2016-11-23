@@ -70,8 +70,9 @@ class HelsinkiImporter(Importer):
             return
         org = dict(origin_id=info['id'])
         org['classification'] = TYPE_NAME_FI[info['type']]
+        org_type = TYPE_MAP[info['type']]
 
-        if org['type'] in ['introducer', 'introducer_field']:
+        if org_type in ['introducer', 'introducer_field']:
             self.skip_orgs.add(org['origin_id'])
             return
 
@@ -90,7 +91,7 @@ class HelsinkiImporter(Importer):
         ]
 
         abbr = org.get('abbreviation', None)
-        if org['type'] in ('council', 'committee', 'board_division', 'board'):
+        if org_type in ('council', 'committee', 'board_division', 'board'):
             org['slug'] = slugify(org['abbreviation'])
         else:
             org['slug'] = slugify(org['origin_id'])
@@ -151,7 +152,10 @@ class HelsinkiImporter(Importer):
                     role=person_info['role'],
                 ))
 
-        self.save_organization(org)
+        if org_type == 'office_holder':
+            self.save_post(org)
+        else:
+            self.save_organization(org)
 
     def import_organizations(self, filename):
         self.logger.info('Importing organizations...')
