@@ -1,6 +1,7 @@
 import os
-from environ import Env
+
 from django.utils.translation import ugettext_lazy as _
+from environ import Env
 
 BASE_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
 assert os.path.exists(os.path.join(BASE_DIR, "manage.py"))

@@ -2,13 +2,14 @@
 # Based heavily on https://github.com/City-of-Helsinki/openahjo/blob/4bcb003d5db932ca28ea6851d76a20a4ee6eef54/decisions/importer/helsinki.py  # noqa
 
 import json
-from dateutil.parser import parse as dateutil_parse
 
+from dateutil.parser import parse as dateutil_parse
 from django.db import transaction
 from django.utils.text import slugify
-from .base import Importer
 
-from decisions.models import DataSource, Person, Membership
+from decisions.models import DataSource, Person
+
+from .base import Importer
 
 TYPE_MAP = {
     1: 'council',
@@ -77,20 +78,23 @@ class HelsinkiImporter(Importer):
             return
 
         # TODO change when model translations are in
-        #org['name'] = {'fi': info['name_fin'], 'sv': info['name_swe']}
+        """
+        org['name'] = {'fi': info['name_fin'], 'sv': info['name_swe']}
+        """
         org['name'] = info['name_fin']
 
         if info['shortname']:
             org['abbreviation'] = info['shortname']
 
         # FIXME: Use maybe sometime
+        """
         DUPLICATE_ABBREVS = [
             'AoOp', 'Vakaj', 'Talk', 'KIT', 'HTA', 'Ryj', 'Pj', 'Sotep', 'Hp',
             'Kesvlk siht', 'Kulttj', 'HVI', 'Sostap', 'KOT',
             'Lsp', 'Kj', 'KYT', 'AST', 'Sote', 'Vp', 'HHE', 'Tj', 'HAKE', 'Ko'
         ]
+        """
 
-        abbr = org.get('abbreviation', None)
         if org_type in ('council', 'committee', 'board_division', 'board'):
             org['slug'] = slugify(org['abbreviation'])
         else:
@@ -180,7 +184,7 @@ class HelsinkiImporter(Importer):
                     ordered.append(org)
                     continue
                 for p in org['parents']:
-                    if not 'added' in self.org_dict[p]:
+                    if 'added' not in self.org_dict[p]:
                         break
                 else:
                     org['added'] = True

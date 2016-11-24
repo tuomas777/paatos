@@ -1,5 +1,6 @@
 import factory
 from faker import Faker
+
 from decisions.models import Event
 
 fake = Faker()

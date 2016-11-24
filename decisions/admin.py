@@ -1,6 +1,7 @@
 from django.apps import apps
 from django.contrib import admin
 from easy_select2 import select2_modelform
+
 from decisions.models import Action, Content, Event, Membership, Organization, Person, Post
 
 

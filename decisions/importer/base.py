@@ -91,7 +91,7 @@ class Importer(object):
             defaults['organization'] = Organization.objects.get(origin_id=organization_id)
         except Organization.DoesNotExist:
             self.logger.error('Cannot set org for %s, org with origin_id %s does not exist' %
-            (info['name'], organization_id))
+                              (info['name'], organization_id))
 
         post, created = Post.objects.update_or_create(
             data_source=self.data_source,
