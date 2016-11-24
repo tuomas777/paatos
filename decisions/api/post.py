@@ -1,13 +1,16 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import CharFilter
 from rest_framework import serializers, viewsets
 from decisions.models import Action, Post
 from .base import BaseFilter, DataModelSerializer
 
 
 class PostFilter(BaseFilter):
+    organization = CharFilter(name='organization_id')
+
     class Meta:
         model = Post
-        fields = BaseFilter.Meta.fields
+        fields = BaseFilter.Meta.fields + ('organization',)
 
 
 class PostSerializer(DataModelSerializer):

@@ -26,7 +26,7 @@ class CaseSerializer(DataModelSerializer):
 
     class Meta:
         model = Case
-        exclude = ('related_cases',)
+        fields = '__all__'
 
 
 class CaseViewSet(viewsets.ReadOnlyModelViewSet):

@@ -15,7 +15,7 @@ class EventSerializer(DataModelSerializer):
 
     class Meta:
         model = Event
-        exclude = ('attendees',)
+        fields = '__all__'
 
 
 class EventViewSet(viewsets.ReadOnlyModelViewSet):

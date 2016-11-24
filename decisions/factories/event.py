@@ -11,5 +11,4 @@ class EventFactory(factory.django.DjangoModelFactory):
         model = Event
 
     name = fake.text(max_nb_chars=20)
-    description = fake.paragraph(nb_sentences=5)
     start_date = fake.date()

@@ -18,9 +18,7 @@ class CaseFactory(factory.django.DjangoModelFactory):
         model = Case
 
     title = fake.text(max_nb_chars=50)
-    summary = fake.paragraph(nb_sentences=5)
     register_id = factory.Sequence(lambda n: 'HEL 2016-{:0>6}'.format(n))
-    creation_date = fake.date()
     function = factory.SubFactory(FunctionFactory)
 
 
