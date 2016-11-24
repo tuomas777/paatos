@@ -12,4 +12,3 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         importer = HelsinkiImporter(options)
         importer.import_organizations(options['filename'])
-        self.stdout.write(self.style.SUCCESS('All done!'))

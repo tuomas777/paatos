@@ -24,7 +24,6 @@ class OpenAhjoImporter(Importer):
 
         for function_data in data['categories']:
             defaults = dict(
-                data_source=self.data_source,
                 name=function_data['name'],
                 function_id=function_data['origin_id'],
             )
@@ -39,6 +38,7 @@ class OpenAhjoImporter(Importer):
 
             function, created = Function.objects.update_or_create(
                 origin_id=function_data['id'],
+                data_source=self.data_source,
                 defaults=defaults
             )
 
@@ -50,8 +50,6 @@ class OpenAhjoImporter(Importer):
 
         for meeting_data in data['meetings']:
             defaults = dict(
-                data_source=self.data_source,
-                origin_id=meeting_data['id'],
                 start_date=meeting_data['date'],
                 end_date=meeting_data['date'],
             )
@@ -68,6 +66,7 @@ class OpenAhjoImporter(Importer):
                     continue
 
             event, created = Event.objects.update_or_create(
+                data_source=self.data_source,
                 origin_id=meeting_data['id'],
                 defaults=defaults
             )
@@ -130,7 +129,6 @@ class OpenAhjoImporter(Importer):
                 continue
 
             defaults = dict(
-                data_source=self.data_source,
                 title=agenda_item_data['subject'],
                 ordering=agenda_item_data['index'],
                 resolution=agenda_item_data['resolution'] or '',
@@ -158,6 +156,7 @@ class OpenAhjoImporter(Importer):
                     continue
 
             action, created = Action.objects.update_or_create(
+                data_source=self.data_source,
                 origin_id=agenda_item_data['id'],
                 defaults=defaults
             )
@@ -170,8 +169,6 @@ class OpenAhjoImporter(Importer):
 
         for content_section_data in data['content_sections']:
             defaults = dict(
-                data_source=self.data_source,
-                origin_id=content_section_data['id'],
                 hypertext=content_section_data['text'],
                 type=content_section_data['type'],
                 ordering=content_section_data['index'],
@@ -186,6 +183,7 @@ class OpenAhjoImporter(Importer):
                 continue
 
             content, created = Content.objects.update_or_create(
+                data_source=self.data_source,
                 origin_id=content_section_data['id'],
                 defaults=defaults
             )
@@ -200,8 +198,6 @@ class OpenAhjoImporter(Importer):
 
         for attachment_data in data['attachments']:
             defaults = dict(
-                data_source=self.data_source,
-                origin_id=attachment_data['id'],
                 name=attachment_data['name'] or '',
                 url=url_base + attachment_data['url'] if attachment_data['url'] and url_base else '',
                 number=attachment_data['number'],
@@ -218,6 +214,7 @@ class OpenAhjoImporter(Importer):
                 continue
 
             attachment, created = Attachment.objects.update_or_create(
+                data_source=self.data_source,
                 origin_id=attachment_data['id'],
                 defaults=defaults
             )
@@ -225,16 +222,25 @@ class OpenAhjoImporter(Importer):
             if created:
                 self.logger.info('Created attachment %s' % attachment)
 
-    def import_data(self, filename):
+    def import_data(self):
         self.logger.info('Importing open ahjo data...')
 
-        with open(filename, 'r') as data_file:
+        with open(self.options['filename'], 'r') as data_file:
             data = json.load(data_file)
 
         # pre calc meeting to org mapping
         org_dict = {o['origin_id']: o for o in data['organizations']}
         policymaker_to_org = {p['id']: org_dict[p['origin_id']] for p in data['policymakers']}
         self.meeting_to_org = {m['id']: policymaker_to_org[m['policymaker']] for m in data['meetings']}
+
+        if self.options['flush']:
+            self.logger.info('Deleting all objects first...')
+            Function.objects.all().delete()
+            Event.objects.all().delete()
+            CaseGeometry.objects.all().delete()
+            Action.objects.all().delete()
+            Content.objects.all().delete()
+            Attachment.objects.all().delete()
 
         self._import_functions(data)
         self._import_events(data)
@@ -243,3 +249,5 @@ class OpenAhjoImporter(Importer):
         self._import_actions(data)
         self._import_contents(data)
         self._import_attachments(data)
+
+        self.logger.info('Import done!')

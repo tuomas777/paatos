@@ -7,7 +7,9 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('filename', type=str)
+        parser.add_argument('--flush', action='store_true', dest='flush', default=False,
+                            help='Delete all existing objects first')
 
     def handle(self, *args, **options):
         importer = OpenAhjoImporter(options)
-        importer.import_data(options['filename'])
+        importer.import_data()

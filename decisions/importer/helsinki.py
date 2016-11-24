@@ -189,3 +189,5 @@ class HelsinkiImporter(Importer):
         for i, org in enumerate(ordered):
             self.logger.info('Processing organization {} / {}'.format(i + 1, len(ordered)))
             self._import_organization(org)
+
+        self.logger.info('Import done!')
