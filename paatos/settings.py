@@ -72,7 +72,10 @@ TEMPLATES = [
 ]
 
 DATABASES = {
-    "default": env.db_url(default="sqlite:///%s" % os.path.join(BASE_DIR, "db.sqlite3")),
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'paatos',
+    }
 }
 
 
